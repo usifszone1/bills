@@ -20,10 +20,10 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications }) => {
       <table className="w-full min-w-full text-sm">
         <thead>
           <tr className="border-b border-pharmacy-navy/10">
-            <th className="py-2 px-1 text-left rtl font-medium text-pharmacy-navy">الدواء</th>
-            <th className="py-2 px-1 text-center font-medium text-pharmacy-navy">الكمية</th>
-            <th className="py-2 px-1 text-center font-medium text-pharmacy-navy">السعر</th>
-            <th className="py-2 px-1 text-right font-medium text-pharmacy-navy">الإجمالي</th>
+            <th className="py-2 px-1 text-left font-medium text-pharmacy-navy">Medication</th>
+            <th className="py-2 px-1 text-center font-medium text-pharmacy-navy">Quantity</th>
+            <th className="py-2 px-1 text-center font-medium text-pharmacy-navy">Price</th>
+            <th className="py-2 px-1 text-right font-medium text-pharmacy-navy">Total</th>
           </tr>
         </thead>
         <tbody>
@@ -32,7 +32,7 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications }) => {
               key={index} 
               className="border-b border-pharmacy-navy/5 hover:bg-pharmacy-lightGray transition-colors"
             >
-              <td className="py-2 px-1 text-left rtl">{medication.name}</td>
+              <td className="py-2 px-1 text-left">{medication.name}</td>
               <td className="py-2 px-1 text-center">
                 {medication.quantity} {medication.unit}
               </td>
