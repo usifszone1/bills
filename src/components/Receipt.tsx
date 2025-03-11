@@ -18,23 +18,22 @@ const Receipt: React.FC<ReceiptProps> = ({ data }) => {
       {/* Customer Information */}
       <div className="mb-6 p-4 bg-pharmacy-lightBlue/30 rounded-md animate-scale-in">
         <h2 className="text-pharmacy-navy font-medium mb-3 text-center">تعـاقدات</h2>
-        <h3 className="text-pharmacy-navy/80 font-medium mb-3 text-center text-sm">شركة الأهلي للخدمات الطبية</h3>
         
         <div className="grid grid-cols-1 gap-4">
-          <div className="text-right">
+          <div>
             <p className="text-sm text-pharmacy-darkGray/70">الاسم:</p>
             <p className="font-medium rtl">{data.customer.name}</p>
           </div>
           
           {data.summary.coveragePercentage > 0 && (
-            <div className="text-right">
+            <div>
               <p className="text-sm text-pharmacy-darkGray/70">نسبة التغطية:</p>
               <p className="font-medium">{data.summary.coveragePercentage}%</p>
             </div>
           )}
           
           {data.customer.date && (
-            <div className="text-right">
+            <div>
               <p className="text-sm text-pharmacy-darkGray/70">التاريخ:</p>
               <p className="font-medium">{data.customer.date}</p>
             </div>

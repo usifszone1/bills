@@ -36,3 +36,4 @@ const SummaryBox: React.FC<SummaryBoxProps> = ({ summary }) => {
 };
 
 export default SummaryBox;
+
