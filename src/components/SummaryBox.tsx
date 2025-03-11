@@ -18,13 +18,20 @@ const SummaryBox: React.FC<SummaryBoxProps> = ({ summary }) => {
         </div>
         
         {summary.coveragePercentage > 0 && (
-          <div className="flex justify-between">
-            <span className="text-pharmacy-darkGray/80">مبلغ التغطية:</span>
-            <span className="font-medium text-pharmacy-coral">- {summary.coverageAmount.toFixed(2)}</span>
-          </div>
+          <>
+            <div className="flex justify-between">
+              <span className="text-pharmacy-darkGray/80">نسبة التغطية:</span>
+              <span className="font-medium">{summary.coveragePercentage}%</span>
+            </div>
+            
+            <div className="flex justify-between">
+              <span className="text-pharmacy-darkGray/80">مبلغ التغطية:</span>
+              <span className="font-medium text-pharmacy-coral">- {summary.coverageAmount.toFixed(2)}</span>
+            </div>
+            
+            <div className="border-t border-pharmacy-navy/10 pt-2 mt-2"></div>
+          </>
         )}
-        
-        <div className="border-t border-pharmacy-navy/10 pt-2 mt-2"></div>
         
         <div className="flex justify-between font-bold">
           <span className="text-pharmacy-navy">المجموع النهائي:</span>
