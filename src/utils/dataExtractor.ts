@@ -21,15 +21,15 @@ export const extractCustomerInfo = (text: string): Customer => {
   };
 
   try {
-    // Pattern for customer name (this is a simplified example)
-    const namePattern = /(?:اسم المريض|اسم العميل|Patient Name|Customer)[\s:]+([^\n\r]+)/i;
+    // Enhanced pattern for customer name - using both the original and new patterns
+    const namePattern = /(?:اسم المريض|اسم العميل|Patient Name|Customer|Beneficiary Name)[\s:]+([^\n\/]+)/i;
     const nameMatch = text.match(namePattern);
     if (nameMatch && nameMatch[1]) {
       customer.name = nameMatch[1].trim();
     }
 
     // Pattern for customer ID
-    const idPattern = /(?:الرقم القومي|رقم الهوية|ID Number|ID)[\s:]+([0-9\-]+)/i;
+    const idPattern = /(?:الرقم القومي|رقم الهوية|ID Number|ID|Beneficiary ID)[\s:]+([0-9\-]+)/i;
     const idMatch = text.match(idPattern);
     if (idMatch && idMatch[1]) {
       customer.id = idMatch[1].trim();
@@ -53,27 +53,48 @@ export const extractMedications = (text: string): Medication[] => {
   const medications: Medication[] = [];
 
   try {
-    // Looking for patterns like: Medicine Name - Quantity x Price
-    // This is a simplified approach and might need to be adjusted based on the actual PDF format
-    const medicationPattern = /([a-zA-Z\u0600-\u06FF\s]+)[\s-]+(\d+)[\s\*x]+([\d\.]+)/gi;
+    // New pattern provided by the user
+    const medicationPattern = /([\d\.]+)\/(\w+)\s+(.*?)\s+([\d\.]+)/gm;
     
     let match;
     while ((match = medicationPattern.exec(text)) !== null) {
-      const name = match[1].trim();
-      const quantity = parseInt(match[2], 10);
-      const price = parseFloat(match[3]);
+      const quantity = parseFloat(match[1]);
+      const unit = match[2].trim();
+      const name = match[3].trim();
+      const price = parseFloat(match[4]);
       const total = quantity * price;
       
       medications.push({
         name,
         quantity,
-        unit: 'box', // Default unit, can be enhanced to extract actual units
+        unit,
         price,
         total
       });
     }
 
-    // If no medications were found, try a more generic approach
+    // If no medications were found with the new pattern, try the original patterns
+    if (medications.length === 0) {
+      // Original pattern: Looking for patterns like: Medicine Name - Quantity x Price
+      const oldMedicationPattern = /([a-zA-Z\u0600-\u06FF\s]+)[\s-]+(\d+)[\s\*x]+([\d\.]+)/gi;
+      
+      while ((match = oldMedicationPattern.exec(text)) !== null) {
+        const name = match[1].trim();
+        const quantity = parseInt(match[2], 10);
+        const price = parseFloat(match[3]);
+        const total = quantity * price;
+        
+        medications.push({
+          name,
+          quantity,
+          unit: 'box', // Default unit
+          price,
+          total
+        });
+      }
+    }
+
+    // If still no medications were found, try a more generic approach
     if (medications.length === 0) {
       // Extract any lines that contain numbers that might represent quantity and price
       const lines = text.split('\n');
@@ -148,8 +169,8 @@ export const extractReceiptData = (text: string): ReceiptData => {
 // Extract coverage percentage
 export const extractCoveragePercentage = (text: string): number => {
   try {
-    // Pattern for coverage percentage
-    const coveragePattern = /(?:تغطية|نسبة التغطية|Coverage|Insurance)[\s:]+(\d+)%/i;
+    // Enhanced pattern for coverage percentage
+    const coveragePattern = /(?:تغطية|نسبة التغطية|Coverage|Insurance|coverage percentage)[\s:]+(\d+)%?/i;
     const coverageMatch = text.match(coveragePattern);
     if (coverageMatch && coverageMatch[1]) {
       return parseInt(coverageMatch[1], 10);
