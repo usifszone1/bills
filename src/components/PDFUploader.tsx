@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Upload, FileUp, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -58,7 +59,10 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({
     setIsLoading(true);
     setError(null);
 
-    simulateProcessing(() => {
+    // For now, we're simulating the PDF processing with a timeout
+    // In a real implementation, you would use a PDF parsing library
+    setTimeout(() => {
+      // Generate sample data
       if (isMultiple) {
         onDataExtracted(createMultipleSampleReceipts(Math.floor(Math.random() * 3) + 2));
       } else {
@@ -71,15 +75,12 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({
   const handleUseSample = () => {
     setIsLoading(true);
     setError(null);
-
-    simulateProcessing(() => {
+    
+    // Simulate processing delay
+    setTimeout(() => {
       onUseSample();
       setIsLoading(false);
     }, 800);
-  };
-
-  const simulateProcessing = (callback: () => void, delay: number) => {
-    setTimeout(callback, delay);
   };
 
   return (
@@ -100,7 +101,6 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({
           onChange={handleFileChange}
           accept=".pdf"
           className="hidden"
-          aria-label="Upload PDF"
         />
         <div className="flex flex-col items-center space-y-4">
           <div className="rounded-full bg-pharmacy-lightBlue p-4">
