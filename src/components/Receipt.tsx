@@ -17,7 +17,7 @@ const Receipt: React.FC<ReceiptProps> = ({ data }) => {
       
       {/* Customer Information */}
       <div className="mb-6 p-4 bg-pharmacy-lightBlue/30 rounded-md animate-scale-in">
-        <h2 className="text-pharmacy-navy font-medium mb-3 text-center">معلومات العميل</h2>
+        <h2 className="text-pharmacy-navy font-medium mb-3 text-center">تعـاقدات</h2>
         
         <div className="grid grid-cols-1 gap-4">
           <div>
@@ -84,4 +84,3 @@ const Receipt: React.FC<ReceiptProps> = ({ data }) => {
 };
 
 export default Receipt;
-
