@@ -19,16 +19,18 @@ const Receipt: React.FC<ReceiptProps> = ({ data }) => {
       <div className="mb-6 p-4 bg-pharmacy-lightBlue/30 rounded-md animate-scale-in">
         <h2 className="text-pharmacy-navy font-medium mb-3 text-center">معلومات العميل</h2>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <div>
             <p className="text-sm text-pharmacy-darkGray/70">الاسم:</p>
             <p className="font-medium rtl">{data.customer.name}</p>
           </div>
           
-          <div>
-            <p className="text-sm text-pharmacy-darkGray/70">الرقم القومي:</p>
-            <p className="font-medium">{data.customer.id}</p>
-          </div>
+          {data.summary.coveragePercentage > 0 && (
+            <div>
+              <p className="text-sm text-pharmacy-darkGray/70">نسبة التغطية:</p>
+              <p className="font-medium">{data.summary.coveragePercentage}%</p>
+            </div>
+          )}
           
           {data.customer.date && (
             <div>
@@ -82,3 +84,4 @@ const Receipt: React.FC<ReceiptProps> = ({ data }) => {
 };
 
 export default Receipt;
+
