@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { parsePDF } from '@/utils/pdfParser';
@@ -41,40 +40,35 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({ onDataExtracted }) => {
     }
   };
 
-  const processFile = async (file: File) => {
-    // Check if the file is a PDF
+  const showToast = (title: string, description: string, variant: "default" | "destructive" = "default") => {
+    toast({
+      title,
+      description,
+      variant,
+    });
+  };
+
+  const validateFile = (file: File): boolean => {
     if (file.type !== 'application/pdf') {
-      toast({
-        title: "Error",
-        description: "Please upload a PDF file",
-        variant: "destructive",
-      });
-      return;
+      showToast("Error", "Please upload a PDF file", "destructive");
+      return false;
     }
+    return true;
+  };
+
+  const processFile = async (file: File) => {
+    if (!validateFile(file)) return;
 
     setIsProcessing(true);
 
     try {
-      // Parse the PDF file
       const pdfText = await parsePDF(file);
-      
-      // Extract receipt data
       const receiptData = extractReceiptData(pdfText);
-      
-      // Pass the data to the parent component
       onDataExtracted(receiptData);
-      
-      toast({
-        title: "Success",
-        description: "PDF processed successfully",
-      });
-    } catch (error) {
+      showToast("Success", "PDF processed successfully");
+    } catch (error: any) {
       console.error('Error processing PDF:', error);
-      toast({
-        title: "Error",
-        description: "Failed to process PDF file",
-        variant: "destructive",
-      });
+      showToast("Error", `Failed to process PDF file: ${error.message}`, "destructive");
     } finally {
       setIsProcessing(false);
     }
@@ -117,7 +111,7 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({ onDataExtracted }) => {
             Drag and drop your PDF file here, or click to select
           </p>
           
-          <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pharmacy-navy hover:bg-pharmacy-navy/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pharmacy-navy/50 transition-colors">
+          <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pharmacy-navy hover:bg-pharmacy-navy/80">
             {isProcessing ? (
               <span className="flex items-center">
                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
