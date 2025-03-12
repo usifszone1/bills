@@ -19,10 +19,10 @@ const formatDate = (date: string) => {
 };
 
 // Separate functional component for displaying customer information
-const CustomerInfo = ({ label, value }: { label: string, value: string | number }) => (
-  <div className="text-right">
-    <p className="text-sm text-pharmacy-darkGray/70">{label}</p>
-    <p className="font-medium rtl">{value}</p>
+const CustomerInfo = ({ label, value }: { label: string, value: string | number | undefined }) => (
+  <div className="text-right mb-1">
+    <span className="font-medium rtl">{label}: </span>
+    <span className="font-medium rtl">{value || 'غير متوفر'}</span>
   </div>
 );
 
@@ -45,28 +45,44 @@ const Receipt: React.FC<ReceiptComponentProps> = ({ data }) => {
         <h2 className="text-pharmacy-navy font-medium mb-2 text-center">تعـاقدات</h2>
         <h3 className="text-pharmacy-navy/80 font-medium mb-3 text-center text-sm">شركة الأهلي للخدمات الطبية</h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-3">
-            <CustomerInfo label="الاسم:" value={customer.name} />
-            <CustomerInfo label="التاريخ:" value={customer.date ? formatDate(customer.date) : 'غير متوفر'} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rtl">
+          <div className="space-y-1">
+            <CustomerInfo label="Beneficiary Name" value={customer.name} />
+            <CustomerInfo label="Member Of" value={customer.memberOf || "Agricultural Bank of Egypt"} />
+            <CustomerInfo label="Co-payment" value={`${summary.coveragePercentage}%`} />
+            <CustomerInfo label="Dispensed Date" value={customer.date ? formatDate(customer.date) : 'غير متوفر'} />
           </div>
           
-          <div className="space-y-3">
-            {summary.coveragePercentage > 0 && (
-              <CustomerInfo label="نسبة التغطية:" value={`${summary.coveragePercentage}%`} />
-            )}
-            <CustomerInfo 
-              label="مبلغ المشاركة:" 
-              value={summary.finalTotal.toFixed(2)} 
-            />
+          <div className="space-y-1 md:mt-0 mt-2">
+            {customer.claimCode && <CustomerInfo label="Claim Code" value={customer.claimCode} />}
+            {customer.mobileNo && <CustomerInfo label="Mobile No." value={customer.mobileNo} />}
+            {customer.firstDispensingDate && <CustomerInfo label="First Dispensing Date" value={formatDate(customer.firstDispensingDate)} />}
+            {customer.claimType && <CustomerInfo label="Claim Type" value={customer.claimType} />}
           </div>
         </div>
+        
+        {(customer.specialInstructions || customer.providerNotes) && (
+          <div className="mt-3 pt-2 border-t border-pharmacy-navy/10 grid grid-cols-1 md:grid-cols-2 gap-4 rtl">
+            {customer.specialInstructions && (
+              <div>
+                <span className="font-medium">Special Instructions: </span>
+                <span>{customer.specialInstructions}</span>
+              </div>
+            )}
+            {customer.providerNotes && (
+              <div>
+                <span className="font-medium">Provider Notes: </span>
+                <span>{customer.providerNotes}</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
       
       {/* Medications */}
       <div className="mb-6">
         <h2 className="text-pharmacy-navy font-medium mb-3 text-center">الأدوية</h2>
-        <MedicationTable medications={medications} />
+        <MedicationTable medications={medications} coveragePercentage={summary.coveragePercentage} />
       </div>
       
       {/* Summary */}
