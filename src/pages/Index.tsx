@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ReceiptData } from '@/types';
-import { PHARMACY_INFO } from '@/utils/dataExtractor';
+import { PHARMACY_INFO } from '@/utils/pharmacyInfo';
 import Sidebar from '@/components/Sidebar';
 import MainContent from '@/components/MainContent';
 
