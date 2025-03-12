@@ -1,17 +1,20 @@
+
 import React, { useState } from 'react';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { parsePDF } from '@/utils/pdfParser';
 import { extractReceiptData } from '@/utils/dataExtractor';
 import { ReceiptData } from '@/types';
+import { Loader2, UploadCloud } from 'lucide-react';
 
 interface PDFUploaderProps {
-  onDataExtracted: (data: ReceiptData) => void;
+  onDataExtracted: (data: ReceiptData[]) => void;
 }
 
 const PDFUploader: React.FC<PDFUploaderProps> = ({ onDataExtracted }) => {
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState<{current: number, total: number}>({current: 0, total: 0});
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -29,14 +32,14 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({ onDataExtracted }) => {
     e.stopPropagation();
     setDragActive(false);
     
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      await processFile(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      await processFiles(Array.from(e.dataTransfer.files));
     }
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      await processFile(e.target.files[0]);
+    if (e.target.files && e.target.files.length > 0) {
+      await processFiles(Array.from(e.target.files));
     }
   };
 
@@ -50,27 +53,57 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({ onDataExtracted }) => {
 
   const validateFile = (file: File): boolean => {
     if (file.type !== 'application/pdf') {
-      showToast("Error", "Please upload a PDF file", "destructive");
+      showToast("Error", `File "${file.name}" is not a PDF file`, "destructive");
       return false;
     }
     return true;
   };
 
-  const processFile = async (file: File) => {
-    if (!validateFile(file)) return;
-
+  const processFiles = async (files: File[]) => {
+    const validFiles = files.filter(validateFile);
+    
+    if (validFiles.length === 0) return;
+    
     setIsProcessing(true);
-
+    setProcessingProgress({current: 0, total: validFiles.length});
+    
     try {
-      const pdfText = await parsePDF(file);
-      const receiptData = extractReceiptData(pdfText);
-      onDataExtracted(receiptData);
-      showToast("Success", "PDF processed successfully");
+      const processedData: ReceiptData[] = [];
+      
+      for (let i = 0; i < validFiles.length; i++) {
+        const file = validFiles[i];
+        setProcessingProgress({current: i + 1, total: validFiles.length});
+        
+        try {
+          const pdfText = await parsePDF(file);
+          const receiptData = extractReceiptData(pdfText);
+          
+          // Generate unique invoice ID based on timestamp and random string
+          const uniqueId = `INV-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+          receiptData.invoiceId = uniqueId;
+          
+          processedData.push(receiptData);
+        } catch (error: any) {
+          console.error(`Error processing PDF ${file.name}:`, error);
+          showToast("Warning", `Failed to process "${file.name}": ${error.message}`, "destructive");
+        }
+      }
+      
+      if (processedData.length > 0) {
+        onDataExtracted(processedData);
+        showToast(
+          "Success", 
+          `Successfully processed ${processedData.length} out of ${validFiles.length} PDF files`
+        );
+      } else {
+        showToast("Error", "No PDFs could be processed successfully", "destructive");
+      }
     } catch (error: any) {
-      console.error('Error processing PDF:', error);
-      showToast("Error", `Failed to process PDF file: ${error.message}`, "destructive");
+      console.error('Error batch processing PDFs:', error);
+      showToast("Error", `Failed to process PDF files: ${error.message}`, "destructive");
     } finally {
       setIsProcessing(false);
+      setProcessingProgress({current: 0, total: 0});
     }
   };
 
@@ -88,27 +121,28 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({ onDataExtracted }) => {
         onDrop={handleDrop}
       >
         <div className="flex flex-col items-center justify-center">
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className={`h-12 w-12 mb-4 ${dragActive ? 'text-pharmacy-coral' : 'text-pharmacy-navy/60'}`}
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={1.5} 
-              d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
+          {isProcessing ? (
+            <Loader2 className="h-12 w-12 mb-4 text-pharmacy-coral animate-spin" />
+          ) : (
+            <UploadCloud 
+              className={`h-12 w-12 mb-4 ${dragActive ? 'text-pharmacy-coral' : 'text-pharmacy-navy/60'}`}
             />
-          </svg>
+          )}
           
           <h3 className="text-lg font-medium mb-2">
-            {isProcessing ? 'Processing...' : 'Upload PDF Receipt'}
+            {isProcessing ? 'Processing...' : 'Upload PDF Receipts'}
           </h3>
           
+          {isProcessing && processingProgress.total > 1 && (
+            <p className="text-sm text-pharmacy-darkGray/70 mb-2">
+              Processing file {processingProgress.current} of {processingProgress.total}
+            </p>
+          )}
+          
           <p className="text-sm text-pharmacy-darkGray/70 mb-4">
-            Drag and drop your PDF file here, or click to select
+            {isProcessing 
+              ? 'Please wait while we process your files' 
+              : 'Drag and drop multiple PDF files here, or click to select'}
           </p>
           
           <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pharmacy-navy hover:bg-pharmacy-navy/80">
@@ -121,7 +155,7 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({ onDataExtracted }) => {
                 Processing
               </span>
             ) : (
-              'Select File'
+              'Select Files'
             )}
             <input 
               type="file" 
@@ -129,6 +163,7 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({ onDataExtracted }) => {
               className="hidden" 
               onChange={handleFileChange} 
               disabled={isProcessing}
+              multiple
             />
           </label>
         </div>

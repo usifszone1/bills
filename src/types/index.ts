@@ -34,4 +34,5 @@ export interface ReceiptData {
   medications: Medication[];
   summary: ReceiptSummary;
   pharmacy: PharmacyInfo;
+  invoiceId?: string;
 }
