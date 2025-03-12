@@ -45,4 +45,5 @@ export interface ReceiptData {
   summary: ReceiptSummary;
   pharmacy: PharmacyInfo;
   invoiceId?: string;
+  sequenceNumber?: number;
 }

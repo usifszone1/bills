@@ -4,7 +4,7 @@ import { ReceiptData } from '@/types';
 import PDFUploader from '@/components/PDFUploader';
 import Receipt from '@/components/Receipt';
 import { PHARMACY_INFO } from '@/utils/dataExtractor';
-import { Search, ArrowUp, ArrowDown, X, Trash2 } from 'lucide-react';
+import { Search, X, Trash2 } from 'lucide-react';
 
 const LOCAL_STORAGE_KEY = 'pharmacy-receipts';
 
@@ -18,7 +18,13 @@ const Index = () => {
     const savedReceipts = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (savedReceipts) {
       try {
-        setReceipts(JSON.parse(savedReceipts));
+        const parsedReceipts = JSON.parse(savedReceipts);
+        // Update receipts with sequential numbers if they don't have them
+        const updatedReceipts = parsedReceipts.map((receipt: ReceiptData, index: number) => ({
+          ...receipt,
+          sequenceNumber: index + 1
+        }));
+        setReceipts(updatedReceipts);
       } catch (e) {
         console.error('Failed to parse saved receipts:', e);
       }
@@ -33,49 +39,56 @@ const Index = () => {
   }, [receipts]);
   
   // Sample receipt data for demonstration
-  const sampleData: ReceiptData = {
-    customer: {
-      name: 'أحمد محمد',
-      id: '29703457812345',
-      date: '2023-09-15'
-    },
-    medications: [
-      {
-        name: 'باراسيتامول',
-        quantity: 2,
-        unit: 'علبة',
-        price: 15.50,
-        total: 31.00
+  const createSampleData = (): ReceiptData => {
+    return {
+      customer: {
+        name: 'أحمد محمد',
+        id: '29703457812345',
+        date: '2023-09-15'
       },
-      {
-        name: 'أموكسيسيلين',
-        quantity: 1,
-        unit: 'علبة',
-        price: 45.75,
-        total: 45.75
+      medications: [
+        {
+          name: 'باراسيتامول',
+          quantity: 2,
+          unit: 'علبة',
+          price: 15.50,
+          total: 31.00
+        },
+        {
+          name: 'أموكسيسيلين',
+          quantity: 1,
+          unit: 'علبة',
+          price: 45.75,
+          total: 45.75
+        },
+        {
+          name: 'فيتامين سي',
+          quantity: 3,
+          unit: 'علبة',
+          price: 20.00,
+          total: 60.00
+        }
+      ],
+      summary: {
+        subtotal: 136.75,
+        coveragePercentage: 80,
+        coverageAmount: 109.40,
+        finalTotal: 27.35
       },
-      {
-        name: 'فيتامين سي',
-        quantity: 3,
-        unit: 'علبة',
-        price: 20.00,
-        total: 60.00
-      }
-    ],
-    summary: {
-      subtotal: 136.75,
-      coveragePercentage: 80,
-      coverageAmount: 109.40,
-      finalTotal: 27.35
-    },
-    pharmacy: PHARMACY_INFO,
-    invoiceId: `INV-SAMPLE-${Date.now()}`
+      pharmacy: PHARMACY_INFO,
+      sequenceNumber: receipts.length + 1
+    };
   };
 
   const handleDataExtracted = (newReceipts: ReceiptData[]) => {
-    setReceipts(prev => [...newReceipts, ...prev]);
-    if (newReceipts.length === 1) {
-      setSelectedReceipt(newReceipts[0]);
+    // Add sequential numbers to new receipts
+    const updatedNewReceipts = newReceipts.map((receipt, index) => ({
+      ...receipt,
+      sequenceNumber: receipts.length + index + 1
+    }));
+    setReceipts(prev => [...updatedNewReceipts, ...prev]);
+    if (updatedNewReceipts.length === 1) {
+      setSelectedReceipt(updatedNewReceipts[0]);
     }
   };
 
@@ -83,9 +96,16 @@ const Index = () => {
     setSelectedReceipt(null);
   };
   
-  const handleDeleteReceipt = (invoiceId: string) => {
-    setReceipts(prev => prev.filter(receipt => receipt.invoiceId !== invoiceId));
-    if (selectedReceipt && selectedReceipt.invoiceId === invoiceId) {
+  const handleDeleteReceipt = (sequenceNumber: number) => {
+    setReceipts(prev => {
+      const filtered = prev.filter(receipt => receipt.sequenceNumber !== sequenceNumber);
+      // Reassign sequential numbers
+      return filtered.map((receipt, index) => ({
+        ...receipt,
+        sequenceNumber: index + 1
+      }));
+    });
+    if (selectedReceipt && selectedReceipt.sequenceNumber === sequenceNumber) {
       setSelectedReceipt(null);
     }
   };
@@ -98,7 +118,7 @@ const Index = () => {
   
   const filteredReceipts = receipts.filter(receipt => 
     receipt.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (receipt.invoiceId && receipt.invoiceId.toLowerCase().includes(searchTerm.toLowerCase()))
+    (receipt.sequenceNumber && receipt.sequenceNumber.toString().includes(searchTerm))
   );
 
   return (
@@ -131,7 +151,7 @@ const Index = () => {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-pharmacy-darkGray/50" size={16} />
                   <input
                     type="text"
-                    placeholder="Search by name or invoice ID"
+                    placeholder="Search by name or invoice number"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full rounded-md border border-pharmacy-navy/20 py-2 pl-9 pr-3 text-sm focus:border-pharmacy-navy focus:outline-none focus:ring-1 focus:ring-pharmacy-navy"
@@ -150,9 +170,9 @@ const Index = () => {
                   {filteredReceipts.length > 0 ? (
                     filteredReceipts.map((receipt) => (
                       <div 
-                        key={receipt.invoiceId} 
+                        key={receipt.sequenceNumber} 
                         className={`p-3 rounded-md cursor-pointer hover:bg-pharmacy-lightBlue/20 transition-colors relative ${
-                          selectedReceipt?.invoiceId === receipt.invoiceId ? 'bg-pharmacy-lightBlue/30 border-l-4 border-pharmacy-navy' : 'bg-pharmacy-lightGray/20'
+                          selectedReceipt?.sequenceNumber === receipt.sequenceNumber ? 'bg-pharmacy-lightBlue/30 border-l-4 border-pharmacy-navy' : 'bg-pharmacy-lightGray/20'
                         }`}
                         onClick={() => setSelectedReceipt(receipt)}
                       >
@@ -163,7 +183,7 @@ const Index = () => {
                               {receipt.customer.date ? new Date(receipt.customer.date).toLocaleDateString() : 'No date'}
                             </p>
                             <p className="text-xs text-pharmacy-darkGray/70 mt-1">
-                              {receipt.invoiceId || 'No ID'}
+                              {receipt.sequenceNumber || 'No ID'}
                             </p>
                           </div>
                           <div className="text-right">
@@ -173,7 +193,7 @@ const Index = () => {
                             <button 
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleDeleteReceipt(receipt.invoiceId || '');
+                                handleDeleteReceipt(receipt.sequenceNumber || 0);
                               }}
                               className="ml-2 text-pharmacy-darkGray/50 hover:text-pharmacy-coral transition-colors"
                               title="Delete receipt"
@@ -212,7 +232,7 @@ const Index = () => {
                 <div className="flex justify-center">
                   <button
                     onClick={() => {
-                      const sampleWithId = {...sampleData, invoiceId: `INV-SAMPLE-${Date.now()}`};
+                      const sampleWithId = createSampleData();
                       setReceipts([sampleWithId]);
                       setSelectedReceipt(sampleWithId);
                     }}

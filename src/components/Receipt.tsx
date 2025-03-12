@@ -27,7 +27,7 @@ const CustomerInfo = ({ label, value }: { label: string, value: string | number 
 );
 
 const Receipt: React.FC<ReceiptComponentProps> = ({ data }) => {
-  const { customer, summary, medications, pharmacy, invoiceId } = data;
+  const { customer, summary, medications, pharmacy, sequenceNumber } = data;
 
   return (
     <div className="w-full max-w-3xl mx-auto receipt-paper p-6 rounded-lg animate-fade-in mb-8 print:mb-0">
@@ -36,7 +36,7 @@ const Receipt: React.FC<ReceiptComponentProps> = ({ data }) => {
       
       {/* Invoice ID */}
       <div className="mb-2 text-xs text-pharmacy-darkGray/70 flex justify-between">
-        <span>Invoice ID: {invoiceId || 'N/A'}</span>
+        <span>Invoice Number: {sequenceNumber || 'N/A'}</span>
         <span>Print Date: {new Date().toLocaleDateString()}</span>
       </div>
       
@@ -49,34 +49,13 @@ const Receipt: React.FC<ReceiptComponentProps> = ({ data }) => {
           <div className="space-y-1">
             <CustomerInfo label="Beneficiary Name" value={customer.name} />
             <CustomerInfo label="Member Of" value={customer.memberOf || "Agricultural Bank of Egypt"} />
-            <CustomerInfo label="Co-payment" value={`${summary.coveragePercentage}%`} />
-            <CustomerInfo label="Dispensed Date" value={customer.date ? formatDate(customer.date) : 'غير متوفر'} />
           </div>
           
           <div className="space-y-1 md:mt-0 mt-2">
-            {customer.claimCode && <CustomerInfo label="Claim Code" value={customer.claimCode} />}
-            {customer.mobileNo && <CustomerInfo label="Mobile No." value={customer.mobileNo} />}
-            {customer.firstDispensingDate && <CustomerInfo label="First Dispensing Date" value={formatDate(customer.firstDispensingDate)} />}
-            {customer.claimType && <CustomerInfo label="Claim Type" value={customer.claimType} />}
+            <CustomerInfo label="Co-payment" value={`${summary.coveragePercentage}%`} />
+            <CustomerInfo label="Dispensed Date" value={customer.date ? formatDate(customer.date) : 'غير متوفر'} />
           </div>
         </div>
-        
-        {(customer.specialInstructions || customer.providerNotes) && (
-          <div className="mt-3 pt-2 border-t border-pharmacy-navy/10 grid grid-cols-1 md:grid-cols-2 gap-4 rtl">
-            {customer.specialInstructions && (
-              <div>
-                <span className="font-medium">Special Instructions: </span>
-                <span>{customer.specialInstructions}</span>
-              </div>
-            )}
-            {customer.providerNotes && (
-              <div>
-                <span className="font-medium">Provider Notes: </span>
-                <span>{customer.providerNotes}</span>
-              </div>
-            )}
-          </div>
-        )}
       </div>
       
       {/* Medications */}
