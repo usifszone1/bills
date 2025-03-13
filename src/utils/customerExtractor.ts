@@ -16,6 +16,7 @@ import { Customer } from '@/types';
 export const extractCustomerInfo = (text: string): Customer => {
   // Default values
   let customer: Customer = {
+    name: 'Anonymous', // Adding the required name property with default value
     id: 'Unknown ID',
     date: new Date().toLocaleDateString(),
     memberOf: 'Agricultural Bank of Egypt'
