@@ -1,7 +1,18 @@
 
+/**
+ * @file medicationExtractor.ts
+ * @description Functions for extracting medication information from PDF text
+ */
+
 import { Medication } from '@/types';
 
-// Extract medication information
+/**
+ * Extracts medication information from the PDF text
+ * Uses multiple pattern matching strategies to identify medication details
+ * 
+ * @param {string} text - The raw text extracted from a PDF document
+ * @returns {Medication[]} Array of medication objects with name, quantity, unit, price and total
+ */
 export const extractMedications = (text: string): Medication[] => {
   const medications: Medication[] = [];
 

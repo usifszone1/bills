@@ -1,7 +1,18 @@
 
+/**
+ * @file customerExtractor.ts
+ * @description Functions for extracting customer information from PDF text
+ */
+
 import { Customer } from '@/types';
 
-// Extract customer information
+/**
+ * Extracts customer information from the PDF text
+ * Uses regex patterns to identify customer details like name, ID, date, etc.
+ * 
+ * @param {string} text - The raw text extracted from a PDF document
+ * @returns {Customer} Customer information object with extracted details
+ */
 export const extractCustomerInfo = (text: string): Customer => {
   // Default values
   let customer: Customer = {

@@ -1,7 +1,15 @@
 
+/**
+ * @file pharmacyInfo.ts
+ * @description Contains static information about the pharmacy
+ */
+
 import { PharmacyInfo } from '@/types';
 
-// Pharmacy information (static)
+/**
+ * Static pharmacy information used throughout the application
+ * Contains name, address, contact information and logo path
+ */
 export const PHARMACY_INFO: PharmacyInfo = {
   name: 'صيدلية الزهور',
   address: 'ش 6 أكتوبر - سور النادي الرياضي بجوار مسجد الاستاد - كفر الشيخ',
