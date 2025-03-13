@@ -8,7 +8,7 @@ import { Customer } from '@/types';
 
 /**
  * Extracts customer information from the PDF text
- * Uses regex patterns to identify customer details like name, ID, date, etc.
+ * Uses regex patterns to identify customer details like ID, date, and organization
  * 
  * @param {string} text - The raw text extracted from a PDF document
  * @returns {Customer} Customer information object with extracted details
@@ -16,20 +16,12 @@ import { Customer } from '@/types';
 export const extractCustomerInfo = (text: string): Customer => {
   // Default values
   let customer: Customer = {
-    name: 'Unknown Customer',
     id: 'Unknown ID',
     date: new Date().toLocaleDateString(),
     memberOf: 'Agricultural Bank of Egypt'
   };
 
   try {
-    // Enhanced pattern for customer name - using both the original and new patterns
-    const namePattern = /(?:اسم المريض|Beneficiary Name)[\s:]+([^\n\/]+)/i;
-    const nameMatch = text.match(namePattern);
-    if (nameMatch && nameMatch[1]) {
-      customer.name = nameMatch[1].trim();
-    }
-
     // Pattern for customer ID
     const idPattern = /(?:الرقم القومي|رقم الهوية|ID Number|ID|Beneficiary ID)[\s:]+([0-9\-]+)/i;
     const idMatch = text.match(idPattern);
@@ -37,20 +29,28 @@ export const extractCustomerInfo = (text: string): Customer => {
       customer.id = idMatch[1].trim();
     }
 
-    // Pattern for date
-    const datePattern = /(?:Dispensed Date|التاريخ|تاريخ|Date)[\s:]+([0-9\-/\.]+)/i;
+    // Enhanced pattern for date extraction
+    const datePattern = /(?:Dispensed Date|Date|التاريخ|تاريخ|تاريخ الصرف)[\s:]+([0-9\-/\.\s\p{L}]+)/u;
     const dateMatch = text.match(datePattern);
     if (dateMatch && dateMatch[1]) {
       customer.date = dateMatch[1].trim();
     }
     
-    // Member of pattern
-    const memberPattern = /(?:Member Of|عضو في)[\s:]+([^\n]+)/i;
+    // Enhanced member organization pattern - looking for patterns with "Member Of" or Arabic equivalents
+    const memberPattern = /(?:Member Of|عضو في|موظفى|موظفين|اعضاء|موظفي|عملاء|التأمين على)[\s:]+([^\n]+)/i;
     const memberMatch = text.match(memberPattern);
     if (memberMatch && memberMatch[1]) {
       customer.memberOf = memberMatch[1].trim();
+    } else {
+      // Alternative pattern to capture organizational affiliations
+      const altMemberPattern = /(جمعية|شركة|بنك|مؤسسة|هيئة)[\s]+([\p{L}\s]+)/u;
+      const altMemberMatch = text.match(altMemberPattern);
+      if (altMemberMatch) {
+        customer.memberOf = altMemberMatch[0].trim();
+      }
     }
     
+    // Additional customer information patterns
     // Mobile no pattern
     const mobilePattern = /(?:Mobile No|رقم الجوال)[\s.:]+([0-9\-]+)/i;
     const mobileMatch = text.match(mobilePattern);

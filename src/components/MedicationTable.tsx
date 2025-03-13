@@ -1,6 +1,14 @@
 
 import React from 'react';
 import { Medication } from '@/types';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface MedicationTableProps {
   medications: Medication[];
@@ -25,38 +33,38 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications, coverage
 
   return (
     <div className="w-full overflow-hidden animate-slide-up">
-      <table className="w-full min-w-full text-sm">
-        <thead>
-          <tr className="border-b border-pharmacy-navy/10">
-            <th className="py-2 px-1 text-center font-medium text-pharmacy-navy">Qty</th>
-            <th className="py-2 px-1 text-left font-medium text-pharmacy-navy">Name</th>
-            <th className="py-2 px-1 text-center font-medium text-pharmacy-navy">Unit Price</th>
-            <th className="py-2 px-1 text-right font-medium text-pharmacy-navy">Price</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="text-center font-medium text-pharmacy-navy">Qty</TableHead>
+            <TableHead className="text-left font-medium text-pharmacy-navy">Name</TableHead>
+            <TableHead className="text-center font-medium text-pharmacy-navy">Unit Price</TableHead>
+            <TableHead className="text-right font-medium text-pharmacy-navy">Net Price</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {medications.map((medication, index) => {
             const netAmount = calculateNet(medication.total, coveragePercentage);
             
             return (
-              <tr 
+              <TableRow 
                 key={index} 
-                className="border-b border-pharmacy-navy/5 hover:bg-pharmacy-lightGray transition-colors"
+                className="hover:bg-pharmacy-lightGray transition-colors"
               >
-                <td className="py-2 px-1 text-center">
-                  {medication.quantity} 
-                  <span className="text-xs text-pharmacy-darkGray/70 ml-1">
+                <TableCell className="text-center">
+                  {medication.quantity}{' '}
+                  <span className="text-xs text-pharmacy-darkGray/70">
                     {medication.unit}
                   </span>
-                </td>
-                <td className="py-2 px-1 text-left">{medication.name}</td>
-                <td className="py-2 px-1 text-center">{medication.price.toFixed(2)}</td>
-                <td className="py-2 px-1 text-right">{netAmount.toFixed(2)}</td>
-              </tr>
+                </TableCell>
+                <TableCell className="text-left">{medication.name}</TableCell>
+                <TableCell className="text-center">{medication.price.toFixed(2)}</TableCell>
+                <TableCell className="text-right">{netAmount.toFixed(2)}</TableCell>
+              </TableRow>
             );
           })}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 };
