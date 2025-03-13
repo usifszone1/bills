@@ -13,13 +13,13 @@ const SummaryBox: React.FC<SummaryBoxProps> = ({ summary }) => {
       
       <div className="space-y-2">
         <div className="flex justify-between">
-          <span className="text-pharmacy-darkGray/80">المجموع الفرعي:</span>
+          <span className="text-pharmacy-darkGray/80">Gross Amount:</span>
           <span className="font-medium">{summary.subtotal.toFixed(2)}</span>
         </div>
         
         {summary.coveragePercentage > 0 && (
           <div className="flex justify-between">
-            <span className="text-pharmacy-darkGray/80">مبلغ التغطية:</span>
+            <span className="text-pharmacy-darkGray/80">Insurance Coverage ({summary.coveragePercentage}%):</span>
             <span className="font-medium text-pharmacy-coral">- {summary.coverageAmount.toFixed(2)}</span>
           </div>
         )}
@@ -27,7 +27,7 @@ const SummaryBox: React.FC<SummaryBoxProps> = ({ summary }) => {
         <div className="border-t border-pharmacy-navy/10 pt-2 mt-2"></div>
         
         <div className="flex justify-between font-bold">
-          <span className="text-pharmacy-navy">المجموع النهائي:</span>
+          <span className="text-pharmacy-navy">Patient Payment ({100 - summary.coveragePercentage}%):</span>
           <span className="text-pharmacy-navy">{summary.finalTotal.toFixed(2)}</span>
         </div>
       </div>

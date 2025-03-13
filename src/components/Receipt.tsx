@@ -12,7 +12,11 @@ interface ReceiptComponentProps {
 
 const formatDate = (date: string) => {
   try {
-    return new Date(date).toLocaleDateString('ar-EG');
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   } catch (e) {
     return date;
   }
@@ -47,13 +51,12 @@ const Receipt: React.FC<ReceiptComponentProps> = ({ data }) => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rtl">
           <div className="space-y-1">
-            <CustomerInfo label="Beneficiary Name" value={customer.name} />
             <CustomerInfo label="Member Of" value={customer.memberOf || "Agricultural Bank of Egypt"} />
           </div>
           
           <div className="space-y-1 md:mt-0 mt-2">
-            <CustomerInfo label="Co-payment" value={`${summary.coveragePercentage}%`} />
-            <CustomerInfo label="Dispensed Date" value={customer.date ? formatDate(customer.date) : 'غير متوفر'} />
+            <CustomerInfo label="Co-payment" value={`${100 - summary.coveragePercentage}%`} />
+            <CustomerInfo label="Dispensed Date" value={customer.date ? formatDate(customer.date) : 'Not available'} />
           </div>
         </div>
       </div>

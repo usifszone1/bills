@@ -30,8 +30,8 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications, coverage
           <tr className="border-b border-pharmacy-navy/10">
             <th className="py-2 px-1 text-center font-medium text-pharmacy-navy">Qty</th>
             <th className="py-2 px-1 text-left font-medium text-pharmacy-navy">Name</th>
-            <th className="py-2 px-1 text-center font-medium text-pharmacy-navy">Unit</th>
-            <th className="py-2 px-1 text-right font-medium text-pharmacy-navy">Net</th>
+            <th className="py-2 px-1 text-center font-medium text-pharmacy-navy">Unit Price</th>
+            <th className="py-2 px-1 text-right font-medium text-pharmacy-navy">Price</th>
           </tr>
         </thead>
         <tbody>
@@ -43,7 +43,12 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications, coverage
                 key={index} 
                 className="border-b border-pharmacy-navy/5 hover:bg-pharmacy-lightGray transition-colors"
               >
-                <td className="py-2 px-1 text-center">{medication.quantity}</td>
+                <td className="py-2 px-1 text-center">
+                  {medication.quantity} 
+                  <span className="text-xs text-pharmacy-darkGray/70 ml-1">
+                    {medication.unit}
+                  </span>
+                </td>
                 <td className="py-2 px-1 text-left">{medication.name}</td>
                 <td className="py-2 px-1 text-center">{medication.price.toFixed(2)}</td>
                 <td className="py-2 px-1 text-right">{netAmount.toFixed(2)}</td>
