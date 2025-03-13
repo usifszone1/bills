@@ -36,10 +36,53 @@ const standardizeUnit = (unit: string): string => {
     'حقنة': 'SYRINGE',
     'bottle': 'BOTTLE',
     'زجاجة': 'BOTTLE',
+    'cap': 'CAP',
+    'caps': 'CAP',
+    'capsule': 'CAP',
+    'capsules': 'CAP',
+    'cream': 'CREAM',
   };
 
   const lowerUnit = unit.toLowerCase().trim();
   return unitMap[lowerUnit] || unit.toUpperCase();
+};
+
+/**
+ * Parses quantity string like "1.0/Box" into quantity and unit
+ * @param {string} quantityStr - The quantity string from the PDF
+ * @returns {{ quantity: number, unit: string }} Object with quantity and unit
+ */
+const parseQuantityAndUnit = (quantityStr: string): { quantity: number, unit: string } => {
+  // Default values
+  let quantity = 1;
+  let unit = 'UNIT';
+
+  try {
+    // Handle formats like "1.0/Box", "3.0/Strip", etc.
+    const slashPattern = /^\s*([\d\.]+)\s*\/\s*(\w+)\s*$/i;
+    const slashMatch = quantityStr.match(slashPattern);
+    
+    if (slashMatch) {
+      quantity = parseFloat(slashMatch[1]);
+      unit = standardizeUnit(slashMatch[2]);
+      return { quantity, unit };
+    }
+    
+    // Handle other formats
+    const simplePattern = /^\s*([\d\.]+)\s*(\w+)?\s*$/i;
+    const simpleMatch = quantityStr.match(simplePattern);
+    
+    if (simpleMatch) {
+      quantity = parseFloat(simpleMatch[1]);
+      if (simpleMatch[2]) {
+        unit = standardizeUnit(simpleMatch[2]);
+      }
+    }
+  } catch (error) {
+    console.error('Error parsing quantity and unit:', error);
+  }
+  
+  return { quantity, unit };
 };
 
 /**
@@ -53,25 +96,49 @@ export const extractMedications = (text: string): Medication[] => {
   const medications: Medication[] = [];
 
   try {
-    // Pattern 1: Looking for quantity/unit, name, price pattern
-    // Example: 3/STRIPS Axomyellin Ultra 30 Tablets 460
-    const medicationPattern = /([\d\.]+)\/(\w+)\s+(.*?)\s+([\d\.]+)/gm;
+    // Pattern for table-like format (like in the image):
+    // Qty | ICD | Name | Unit | Dis. | Cop. | Net
+    const tableRowPattern = /([0-9\.]+\/[A-Za-z]+)\s+(?:[^\s|]+)\s+([^\|]+?)\s+([0-9\.]+)\s+(?:[0-9\.]+)\s+(?:[0-9\.]+)\s+([0-9\.]+)/g;
     
     let match;
-    while ((match = medicationPattern.exec(text)) !== null) {
-      const quantity = parseFloat(match[1]);
-      const rawUnit = match[2].trim();
-      const name = match[3].trim();
-      const price = parseFloat(match[4]);
-      const total = quantity * price;
+    while ((match = tableRowPattern.exec(text)) !== null) {
+      const qtyWithUnit = match[1].trim();
+      const name = match[2].trim();
+      const unitPrice = parseFloat(match[3]);
+      const netPrice = parseFloat(match[4]);
+      
+      const { quantity, unit } = parseQuantityAndUnit(qtyWithUnit);
       
       medications.push({
         name,
         quantity,
-        unit: standardizeUnit(rawUnit),
-        price,
-        total
+        unit,
+        price: unitPrice,
+        total: unitPrice * quantity,
+        net: netPrice
       });
+    }
+
+    // Pattern 1: Looking for quantity/unit, name, price pattern
+    // Example: 3/STRIPS Axomyellin Ultra 30 Tablets 460
+    if (medications.length === 0) {
+      const medicationPattern = /([\d\.]+)\/(\w+)\s+(.*?)\s+([\d\.]+)/gm;
+      
+      while ((match = medicationPattern.exec(text)) !== null) {
+        const quantity = parseFloat(match[1]);
+        const rawUnit = match[2].trim();
+        const name = match[3].trim();
+        const price = parseFloat(match[4]);
+        const total = quantity * price;
+        
+        medications.push({
+          name,
+          quantity,
+          unit: standardizeUnit(rawUnit),
+          price,
+          total
+        });
+      }
     }
 
     // Pattern 2: Looking for quantity, unit abbreviation, name, price

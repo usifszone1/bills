@@ -39,12 +39,12 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications, coverage
             <TableHead className="text-center font-medium text-pharmacy-navy">Qty</TableHead>
             <TableHead className="text-left font-medium text-pharmacy-navy">Name</TableHead>
             <TableHead className="text-center font-medium text-pharmacy-navy">Unit Price</TableHead>
-            <TableHead className="text-right font-medium text-pharmacy-navy">Net Price</TableHead>
+            <TableHead className="text-right font-medium text-pharmacy-navy">Total</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {medications.map((medication, index) => {
-            const netAmount = calculateNet(medication.total, coveragePercentage);
+            const netAmount = medication.net || calculateNet(medication.total, coveragePercentage);
             
             return (
               <TableRow 
@@ -52,10 +52,7 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications, coverage
                 className="hover:bg-pharmacy-lightGray transition-colors"
               >
                 <TableCell className="text-center">
-                  {medication.quantity}{' '}
-                  <span className="text-xs text-pharmacy-darkGray/70">
-                    {medication.unit}
-                  </span>
+                  {medication.quantity.toFixed(1)}/{medication.unit}
                 </TableCell>
                 <TableCell className="text-left">{medication.name}</TableCell>
                 <TableCell className="text-center">{medication.price.toFixed(2)}</TableCell>
