@@ -42,10 +42,10 @@ export const calculateReceiptSummary = (medications: Medication[], coveragePerce
   // Apply 7% increase to the total
   const increasedSubtotal = subtotal * 1.07;
   
-  // Calculate coverage amount based on the increased subtotal
+  // Calculate discount amount (coverage amount) based on the increased subtotal
   const coverageAmount = (increasedSubtotal * coveragePercentage) / 100;
   
-  // Calculate final total
+  // Calculate final total (Net)
   const finalTotal = increasedSubtotal - coverageAmount;
   
   return {

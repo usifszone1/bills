@@ -24,6 +24,12 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications, coverage
     );
   }
 
+  // Calculate discount amount (coverage)
+  const calculateDiscount = (total: number, coveragePercentage: number) => {
+    const increasedTotal = total * 1.07;
+    return (increasedTotal * coveragePercentage) / 100;
+  };
+
   // Calculate net price after company discount with 7% added
   const calculateNet = (total: number, coveragePercentage: number) => {
     // Apply 7% increase to the total
@@ -42,13 +48,16 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications, coverage
             <TableHead className="text-center font-medium text-pharmacy-navy">Qty</TableHead>
             <TableHead className="text-left font-medium text-pharmacy-navy">Name</TableHead>
             <TableHead className="text-center font-medium text-pharmacy-navy">Unit Price</TableHead>
-            <TableHead className="text-right font-medium text-pharmacy-navy">Total</TableHead>
+            <TableHead className="text-center font-medium text-pharmacy-navy">Gross</TableHead>
+            <TableHead className="text-center font-medium text-pharmacy-navy">Discount</TableHead>
+            <TableHead className="text-right font-medium text-pharmacy-navy">Net</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {medications.map((medication, index) => {
             // Apply 7% increase to the total
             const increasedTotal = medication.total * 1.07;
+            const discountAmount = calculateDiscount(medication.total, coveragePercentage);
             const netAmount = medication.net || calculateNet(medication.total, coveragePercentage);
             
             return (
@@ -61,7 +70,9 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications, coverage
                 </TableCell>
                 <TableCell className="text-left">{medication.name}</TableCell>
                 <TableCell className="text-center">{medication.price.toFixed(2)}</TableCell>
-                <TableCell className="text-right">{increasedTotal.toFixed(2)}</TableCell>
+                <TableCell className="text-center">{increasedTotal.toFixed(2)}</TableCell>
+                <TableCell className="text-center">{discountAmount.toFixed(2)}</TableCell>
+                <TableCell className="text-right">{netAmount.toFixed(2)}</TableCell>
               </TableRow>
             );
           })}
