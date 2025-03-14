@@ -39,14 +39,17 @@ export const calculateReceiptSummary = (medications: Medication[], coveragePerce
   // Calculate subtotal
   const subtotal = medications.reduce((sum, medication) => sum + medication.total, 0);
   
-  // Calculate coverage amount
-  const coverageAmount = (subtotal * coveragePercentage) / 100;
+  // Apply 7% increase to the total
+  const increasedSubtotal = subtotal * 1.07;
+  
+  // Calculate coverage amount based on the increased subtotal
+  const coverageAmount = (increasedSubtotal * coveragePercentage) / 100;
   
   // Calculate final total
-  const finalTotal = subtotal - coverageAmount;
+  const finalTotal = increasedSubtotal - coverageAmount;
   
   return {
-    subtotal,
+    subtotal: increasedSubtotal, // Using the increased value as the gross amount
     coveragePercentage,
     coverageAmount,
     finalTotal

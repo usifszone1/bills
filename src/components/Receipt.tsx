@@ -44,26 +44,15 @@ const Receipt: React.FC<ReceiptComponentProps> = ({ data }) => {
         <span>Print Date: {new Date().toLocaleDateString()}</span>
       </div>
       
-      {/* Customer Information - Only displaying the three required fields */}
+      {/* Only showing company name and hiding other patient data */}
       <div className="mb-6 p-4 bg-pharmacy-lightBlue/30 rounded-md animate-scale-in">
         <h2 className="text-pharmacy-navy font-medium mb-2 text-center">تعـاقدات</h2>
         <h3 className="text-pharmacy-navy/80 font-medium mb-3 text-center text-sm">شركة الأهلي للخدمات الطبية</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rtl">
-          <div className="space-y-1">
-            <CustomerInfo label="Member Of" value={customer.memberOf || "Agricultural Bank of Egypt"} />
-          </div>
-          
-          <div className="space-y-1 md:mt-0 mt-2">
-            <CustomerInfo label="Co-payment" value={`${100 - summary.coveragePercentage}%`} />
-            <CustomerInfo label="Dispensed Date" value={customer.date ? formatDate(customer.date) : 'Not available'} />
-          </div>
-        </div>
       </div>
       
       {/* Medications */}
       <div className="mb-6">
-        <h2 className="text-pharmacy-navy font-medium mb-3 text-center">الأدوية</h2>
+        <h2 className="text-pharmacy-navy font-medium mb-3 text-center">Medications</h2>
         <MedicationTable medications={medications} coveragePercentage={summary.coveragePercentage} />
       </div>
       
