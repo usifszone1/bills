@@ -24,14 +24,11 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications, coverage
     );
   }
 
-  // Calculate net price after company discount with 7% added
+  // Calculate net price after company discount
   const calculateNet = (total: number, coveragePercentage: number) => {
-    // Apply 7% increase to the total
-    const increasedTotal = total * 1.07;
-    
     // Net is the amount after coverage percentage is applied
-    const discount = (increasedTotal * coveragePercentage) / 100;
-    return increasedTotal - discount;
+    const discount = (total * coveragePercentage) / 100;
+    return total - discount;
   };
 
   return (
@@ -47,8 +44,6 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications, coverage
         </TableHeader>
         <TableBody>
           {medications.map((medication, index) => {
-            // Apply 7% increase to the total
-            const increasedTotal = medication.total * 1.07;
             const netAmount = medication.net || calculateNet(medication.total, coveragePercentage);
             
             return (
@@ -61,7 +56,7 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications, coverage
                 </TableCell>
                 <TableCell className="text-left">{medication.name}</TableCell>
                 <TableCell className="text-center">{medication.price.toFixed(2)}</TableCell>
-                <TableCell className="text-right">{increasedTotal.toFixed(2)}</TableCell>
+                <TableCell className="text-right">{netAmount.toFixed(2)}</TableCell>
               </TableRow>
             );
           })}
