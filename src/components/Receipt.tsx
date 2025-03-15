@@ -33,7 +33,6 @@ const Receipt: React.FC<ReceiptComponentProps> = ({ data }) => {
       return;
     }
 
-    // Get the content to print
     const content = document.querySelector('.receipt-paper');
     
     printWindow.document.write(`
@@ -41,22 +40,14 @@ const Receipt: React.FC<ReceiptComponentProps> = ({ data }) => {
         <head>
           <title>Pharmacy Receipt</title>
           <style>
-            body { font-family: Arial, sans-serif; padding: 20px; margin: 0; }
+            body { font-family: Arial, sans-serif; padding: 20px; }
             .header { text-align: center; margin-bottom: 20px; }
             table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
             table, th, td { border: 1px solid #ddd; }
-            th { background-color: #f2f2f2; font-weight: bold; padding: 8px; text-align: left; }
-            td { padding: 8px; text-align: left; }
+            th, td { padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
             .footer { text-align: center; margin-top: 30px; font-size: 14px; color: #777; }
             .summary { border: 1px solid #ddd; padding: 15px; margin-top: 20px; }
-            .customer-info { margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 5px; }
-            .customer-info h3 { margin-top: 0; text-align: center; }
-            .customer-info .row { display: flex; flex-wrap: wrap; margin-bottom: 5px; }
-            .customer-info .row > div { flex: 1; min-width: 50%; }
-            .logo-image { max-width: 100px; height: auto; }
-            @media print {
-              body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-            }
           </style>
         </head>
         <body>
@@ -70,8 +61,8 @@ const Receipt: React.FC<ReceiptComponentProps> = ({ data }) => {
     // Wait for images and resources to load
     setTimeout(() => {
       printWindow.print();
-      // Don't close the window to allow manual printing
-    }, 1000);
+      printWindow.close();
+    }, 500);
   };
 
   return (
@@ -93,15 +84,11 @@ const Receipt: React.FC<ReceiptComponentProps> = ({ data }) => {
         {/* Additional information from the PDF (highlighted in the image) */}
         <div className="flex flex-wrap justify-between text-sm mt-3 border-t pt-3 border-pharmacy-navy/10">
           <div className="w-full md:w-1/2 mb-2 md:mb-0">
-            <p><span className="font-medium">Beneficiary Name:</span> {customer.name || 'N/A'}</p>
             <p><span className="font-medium">Member ID:</span> {customer.id || 'N/A'}</p>
-            <p><span className="font-medium">Member Of:</span> {customer.memberOf || 'N/A'}</p>
-            <p><span className="font-medium">Mobile No:</span> {customer.mobileNo || 'N/A'}</p>
+            <p><span className="font-medium">Patient Name:</span> {customer.name || 'N/A'}</p>
           </div>
           <div className="w-full md:w-1/2">
-            <p><span className="font-medium">Dispensed Date:</span> {customer.date ? formatDate(customer.date) : 'N/A'}</p>
-            <p><span className="font-medium">Co-payment:</span> {summary.coveragePercentage}%</p>
-            <p><span className="font-medium">Claim Code:</span> {customer.claimCode || 'N/A'}</p>
+            <p><span className="font-medium">Transaction Date:</span> {customer.date ? formatDate(customer.date) : 'N/A'}</p>
             <p><span className="font-medium">Provider:</span> {pharmacy.name}</p>
           </div>
         </div>
