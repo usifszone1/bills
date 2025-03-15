@@ -7,7 +7,8 @@
 import { ReceiptData } from '@/types';
 import { extractCustomerInfo } from './customerExtractor';
 import { extractMedications } from './medicationExtractor';
-import { calculateReceiptSummary, extractCoveragePercentage } from './receiptCalculator';
+import { calculateReceiptSummary } from './receiptCalculator';
+import { extractCoveragePercentage } from './coverageExtractor';
 import { PHARMACY_INFO } from './pharmacyInfo';
 
 /**
@@ -38,4 +39,5 @@ export const extractReceiptData = (text: string): ReceiptData => {
 export { PHARMACY_INFO } from './pharmacyInfo';
 export { extractCustomerInfo } from './customerExtractor';
 export { extractMedications } from './medicationExtractor';
-export { calculateReceiptSummary, extractCoveragePercentage } from './receiptCalculator';
+export { calculateReceiptSummary } from './receiptCalculator';
+export { extractCoveragePercentage } from './coverageExtractor';
