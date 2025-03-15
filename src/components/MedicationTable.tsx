@@ -51,6 +51,7 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications, coverage
             <TableHead className="text-center font-medium text-pharmacy-navy">Gross</TableHead>
             <TableHead className="text-center font-medium text-pharmacy-navy">Discount</TableHead>
             <TableHead className="text-right font-medium text-pharmacy-navy">Net</TableHead>
+            <TableHead className="text-right font-medium text-pharmacy-navy">Total</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -59,6 +60,8 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications, coverage
             const increasedTotal = medication.total * 1.07;
             const discountAmount = calculateDiscount(medication.total, coveragePercentage);
             const netAmount = medication.net || calculateNet(medication.total, coveragePercentage);
+            // Calculate total as sum of discount and net
+            const totalAmount = discountAmount + netAmount;
             
             return (
               <TableRow 
@@ -73,6 +76,7 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications, coverage
                 <TableCell className="text-center">{increasedTotal.toFixed(2)}</TableCell>
                 <TableCell className="text-center">{discountAmount.toFixed(2)}</TableCell>
                 <TableCell className="text-right">{netAmount.toFixed(2)}</TableCell>
+                <TableCell className="text-right">{totalAmount.toFixed(2)}</TableCell>
               </TableRow>
             );
           })}
