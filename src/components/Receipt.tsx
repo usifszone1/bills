@@ -44,7 +44,7 @@ const Receipt: React.FC<ReceiptComponentProps> = ({ data }) => {
         <span>Print Date: {new Date().toLocaleDateString()}</span>
       </div>
       
-      {/* Customer Information - Only displaying the three required fields */}
+      {/* Customer Information */}
       <div className="mb-6 p-4 bg-pharmacy-lightBlue/30 rounded-md animate-scale-in">
         <h2 className="text-pharmacy-navy font-medium mb-2 text-center">تعـاقدات</h2>
         <h3 className="text-pharmacy-navy/80 font-medium mb-3 text-center text-sm">شركة الأهلي للخدمات الطبية</h3>
