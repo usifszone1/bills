@@ -59,9 +59,9 @@ export const extractMedications = (text: string): Medication[] => {
     let match;
     while ((match = medicationPattern.exec(text)) !== null) {
       const quantity = parseFloat(match[1]);
-      const unit = match[2].trim();
-      const name = match[3].trim();
-      const price = parseFloat(match[4]);
+      const unit = match[2]?.trim() || 'unit';
+      const name = match[3]?.trim() || 'Unknown Medication';
+      const price = parseFloat(match[4]) || 0;
       const total = quantity * price;
       
       medications.push({
@@ -79,9 +79,9 @@ export const extractMedications = (text: string): Medication[] => {
       const oldMedicationPattern = /([a-zA-Z\u0600-\u06FF\s]+)[\s-]+(\d+)[\s\*x]+([\d\.]+)/gi;
       
       while ((match = oldMedicationPattern.exec(text)) !== null) {
-        const name = match[1].trim();
-        const quantity = parseInt(match[2], 10);
-        const price = parseFloat(match[3]);
+        const name = match[1]?.trim() || 'Unknown Medication';
+        const quantity = parseInt(match[2] || '1', 10);
+        const price = parseFloat(match[3] || '0');
         const total = quantity * price;
         
         medications.push({
@@ -99,6 +99,8 @@ export const extractMedications = (text: string): Medication[] => {
       // Extract any lines that contain numbers that might represent quantity and price
       const lines = text.split('\n');
       for (const line of lines) {
+        if (!line) continue;
+        
         const numberPattern = /(\d+)/g;
         const numbers = [...line.matchAll(numberPattern)];
         
@@ -108,7 +110,7 @@ export const extractMedications = (text: string): Medication[] => {
           
           // Assume text before first number is the medication name
           const nameEndIndex = line.indexOf(numbers[0][0]);
-          const name = line.substring(0, nameEndIndex).trim();
+          const name = line.substring(0, nameEndIndex).trim() || 'Unknown Item';
           
           if (name && quantity && price) {
             medications.push({
@@ -150,6 +152,25 @@ export const calculateReceiptSummary = (medications: Medication[], coveragePerce
 
 // Main function to extract all data from PDF text
 export const extractReceiptData = (text: string): ReceiptData => {
+  if (!text) {
+    console.error('Error: Empty text provided to extractReceiptData');
+    // Return default data if text is empty
+    return {
+      customer: {
+        name: 'Unknown Customer',
+        id: 'Unknown ID',
+      },
+      medications: [],
+      summary: {
+        subtotal: 0,
+        coveragePercentage: 0,
+        coverageAmount: 0,
+        finalTotal: 0
+      },
+      pharmacy: PHARMACY_INFO
+    };
+  }
+  
   const customer = extractCustomerInfo(text);
   const medications = extractMedications(text);
   
@@ -169,6 +190,8 @@ export const extractReceiptData = (text: string): ReceiptData => {
 // Extract coverage percentage
 export const extractCoveragePercentage = (text: string): number => {
   try {
+    if (!text) return 0;
+    
     // Enhanced pattern for coverage percentage
     const coveragePattern = /(?:تغطية|نسبة التغطية|Coverage|Insurance|coverage percentage)[\s:]+(\d+)%?/i;
     const coverageMatch = text.match(coveragePattern);
