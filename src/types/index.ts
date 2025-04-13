@@ -5,22 +5,12 @@ export interface Medication {
   unit: string;
   price: number;
   total: number;
-  net?: number;
 }
 
 export interface Customer {
   name: string;
   id: string;
   date?: string;
-  memberOf?: string;
-  mobileNo?: string;
-  claimCode?: string;
-  firstDispensingDate?: string;
-  examinationDate?: string;
-  approvalDoctor?: string;
-  claimType?: string;
-  specialInstructions?: string;
-  providerNotes?: string;
 }
 
 export interface ReceiptSummary {
@@ -44,6 +34,4 @@ export interface ReceiptData {
   medications: Medication[];
   summary: ReceiptSummary;
   pharmacy: PharmacyInfo;
-  invoiceId?: string;
-  sequenceNumber?: number;
 }

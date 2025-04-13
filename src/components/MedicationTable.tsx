@@ -1,21 +1,12 @@
 
 import React from 'react';
 import { Medication } from '@/types';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 interface MedicationTableProps {
   medications: Medication[];
-  coveragePercentage: number;
 }
 
-const MedicationTable: React.FC<MedicationTableProps> = ({ medications, coveragePercentage }) => {
+const MedicationTable: React.FC<MedicationTableProps> = ({ medications }) => {
   if (!medications.length) {
     return (
       <div className="py-6 text-center text-pharmacy-darkGray/60 animate-fade-in">
@@ -24,64 +15,33 @@ const MedicationTable: React.FC<MedicationTableProps> = ({ medications, coverage
     );
   }
 
-  // Calculate discount amount (coverage)
-  const calculateDiscount = (total: number, coveragePercentage: number) => {
-    const increasedTotal = total * 1.07;
-    return (increasedTotal * coveragePercentage) / 100;
-  };
-
-  // Calculate net price after company discount with 7% added
-  const calculateNet = (total: number, coveragePercentage: number) => {
-    // Apply 7% increase to the total
-    const increasedTotal = total * 1.07;
-    
-    // Net is the amount after coverage percentage is applied
-    const discount = (increasedTotal * coveragePercentage) / 100;
-    return increasedTotal - discount;
-  };
-
   return (
     <div className="w-full overflow-hidden animate-slide-up">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="text-center font-medium text-pharmacy-navy">Qty</TableHead>
-            <TableHead className="text-left font-medium text-pharmacy-navy">Name</TableHead>
-            <TableHead className="text-center font-medium text-pharmacy-navy">Unit Price</TableHead>
-            <TableHead className="text-center font-medium text-pharmacy-navy">Gross</TableHead>
-            <TableHead className="text-center font-medium text-pharmacy-navy">Discount</TableHead>
-            <TableHead className="text-right font-medium text-pharmacy-navy">Net</TableHead>
-            <TableHead className="text-right font-medium text-pharmacy-navy">Total</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {medications.map((medication, index) => {
-            // Apply 7% increase to the total
-            const increasedTotal = medication.total * 1.07;
-            const discountAmount = calculateDiscount(medication.total, coveragePercentage);
-            const netAmount = medication.net || calculateNet(medication.total, coveragePercentage);
-            // Calculate total as sum of discount and net
-            const totalAmount = discountAmount + netAmount;
-            
-            return (
-              <TableRow 
-                key={index} 
-                className="hover:bg-pharmacy-lightGray transition-colors"
-              >
-                <TableCell className="text-center">
-                  {medication.quantity.toFixed(1)}/{medication.unit}
-                </TableCell>
-                <TableCell className="text-left">{medication.name}</TableCell>
-                <TableCell className="text-center">{medication.price.toFixed(2)}</TableCell>
-                <TableCell className="text-center">{increasedTotal.toFixed(2)}</TableCell>
-                <TableCell className="text-center">{discountAmount.toFixed(2)}</TableCell>
-                <TableCell className="text-right">{netAmount.toFixed(2)}</TableCell>
-                <TableCell className="text-right">{totalAmount.toFixed(2)}</TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      <table className="w-full min-w-full text-sm">
+        <thead>
+          <tr className="border-b border-pharmacy-navy/10">
+            <th className="py-2 px-1 text-left font-medium text-pharmacy-navy">Medication</th>
+            <th className="py-2 px-1 text-center font-medium text-pharmacy-navy">Quantity</th>
+            <th className="py-2 px-1 text-center font-medium text-pharmacy-navy">Price</th>
+            <th className="py-2 px-1 text-right font-medium text-pharmacy-navy">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {medications.map((medication, index) => (
+            <tr 
+              key={index} 
+              className="border-b border-pharmacy-navy/5 hover:bg-pharmacy-lightGray transition-colors"
+            >
+              <td className="py-2 px-1 text-left">{medication.name}</td>
+              <td className="py-2 px-1 text-center">
+                {medication.quantity} {medication.unit}
+              </td>
+              <td className="py-2 px-1 text-center">{medication.price.toFixed(2)}</td>
+              <td className="py-2 px-1 text-right">{medication.total.toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };

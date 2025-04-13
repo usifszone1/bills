@@ -1,153 +1,106 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ReceiptData } from '@/types';
-import { PHARMACY_INFO } from '@/utils/pharmacyInfo';
-import Sidebar from '@/components/Sidebar';
-import MainContent from '@/components/MainContent';
-
-const LOCAL_STORAGE_KEY = 'pharmacy-receipts';
+import PDFUploader from '@/components/PDFUploader';
+import Receipt from '@/components/Receipt';
+import { PHARMACY_INFO } from '@/utils/dataExtractor';
 
 const Index = () => {
-  const [receipts, setReceipts] = useState<ReceiptData[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedReceipt, setSelectedReceipt] = useState<ReceiptData | null>(null);
-  
-  // Load saved receipts from localStorage on component mount
-  useEffect(() => {
-    const savedReceipts = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (savedReceipts) {
-      try {
-        const parsedReceipts = JSON.parse(savedReceipts);
-        // Update receipts with sequential numbers if they don't have them
-        const updatedReceipts = parsedReceipts.map((receipt: ReceiptData, index: number) => ({
-          ...receipt,
-          sequenceNumber: index + 1
-        }));
-        setReceipts(updatedReceipts);
-      } catch (e) {
-        console.error('Failed to parse saved receipts:', e);
-      }
-    }
-  }, []);
-  
-  // Save receipts to localStorage whenever they change
-  useEffect(() => {
-    if (receipts.length > 0) {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(receipts));
-    }
-  }, [receipts]);
+  const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
   
   // Sample receipt data for demonstration
-  const createSampleData = (): ReceiptData => {
-    return {
-      customer: {
-        name: 'أحمد محمد',
-        id: '29703457812345',
-        date: '2023-09-15'
+  const sampleData: ReceiptData = {
+    customer: {
+      name: 'أحمد محمد',
+      id: '29703457812345',
+      date: '2023-09-15'
+    },
+    medications: [
+      {
+        name: 'باراسيتامول',
+        quantity: 2,
+        unit: 'علبة',
+        price: 15.50,
+        total: 31.00
       },
-      medications: [
-        {
-          name: 'باراسيتامول',
-          quantity: 2,
-          unit: 'علبة',
-          price: 15.50,
-          total: 31.00
-        },
-        {
-          name: 'أموكسيسيلين',
-          quantity: 1,
-          unit: 'علبة',
-          price: 45.75,
-          total: 45.75
-        },
-        {
-          name: 'فيتامين سي',
-          quantity: 3,
-          unit: 'علبة',
-          price: 20.00,
-          total: 60.00
-        }
-      ],
-      summary: {
-        subtotal: 136.75,
-        coveragePercentage: 80,
-        coverageAmount: 109.40,
-        finalTotal: 27.35
+      {
+        name: 'أموكسيسيلين',
+        quantity: 1,
+        unit: 'علبة',
+        price: 45.75,
+        total: 45.75
       },
-      pharmacy: PHARMACY_INFO,
-      sequenceNumber: receipts.length + 1
-    };
+      {
+        name: 'فيتامين سي',
+        quantity: 3,
+        unit: 'علبة',
+        price: 20.00,
+        total: 60.00
+      }
+    ],
+    summary: {
+      subtotal: 136.75,
+      coveragePercentage: 80,
+      coverageAmount: 109.40,
+      finalTotal: 27.35
+    },
+    pharmacy: PHARMACY_INFO
   };
 
-  const handleDataExtracted = (newReceipts: ReceiptData[]) => {
-    // Add sequential numbers to new receipts
-    const updatedNewReceipts = newReceipts.map((receipt, index) => ({
-      ...receipt,
-      sequenceNumber: receipts.length + index + 1
-    }));
-    setReceipts(prev => [...updatedNewReceipts, ...prev]);
-    if (updatedNewReceipts.length === 1) {
-      setSelectedReceipt(updatedNewReceipts[0]);
-    }
+  const handleDataExtracted = (data: ReceiptData) => {
+    setReceiptData(data);
   };
 
   const handleReset = () => {
-    setSelectedReceipt(null);
+    setReceiptData(null);
   };
-  
-  const handleDeleteReceipt = (sequenceNumber: number) => {
-    setReceipts(prev => {
-      const filtered = prev.filter(receipt => receipt.sequenceNumber !== sequenceNumber);
-      // Reassign sequential numbers
-      return filtered.map((receipt, index) => ({
-        ...receipt,
-        sequenceNumber: index + 1
-      }));
-    });
-    if (selectedReceipt && selectedReceipt.sequenceNumber === sequenceNumber) {
-      setSelectedReceipt(null);
-    }
-  };
-  
-  const handleClearAllReceipts = () => {
-    setReceipts([]);
-    setSelectedReceipt(null);
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-  };
-  
-  const filteredReceipts = receipts.filter(receipt => 
-    receipt.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (receipt.sequenceNumber && receipt.sequenceNumber.toString().includes(searchTerm))
-  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-pharmacy-lightGray/30 pharmacy-container">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col items-center justify-center mb-8 text-center animate-fade-in">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex flex-col items-center justify-center mb-10 text-center animate-fade-in">
           <h1 className="text-3xl md:text-4xl font-bold text-pharmacy-navy mb-2">Pharmacy Receipt System</h1>
           <p className="text-lg text-pharmacy-darkGray/70 max-w-2xl">
-            Upload pharmacy prescription PDFs to automatically generate receipts
+            Upload a prescription PDF to automatically generate a pharmacy receipt
           </p>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Sidebar */}
-          <Sidebar
-            receipts={receipts}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            selectedReceipt={selectedReceipt}
-            setSelectedReceipt={setSelectedReceipt}
-            handleDeleteReceipt={handleDeleteReceipt}
-            handleClearAllReceipts={handleClearAllReceipts}
-            handleDataExtracted={handleDataExtracted}
-            createSampleData={createSampleData}
-            filteredReceipts={filteredReceipts}
-            setReceipts={setReceipts}
-          />
-          
-          {/* Main Content */}
-          <MainContent selectedReceipt={selectedReceipt} handleReset={handleReset} />
+        <div className="max-w-4xl mx-auto">
+          {!receiptData ? (
+            <div className="animate-slide-up">
+              <PDFUploader onDataExtracted={handleDataExtracted} />
+              
+              <div className="mt-8 p-4 border border-pharmacy-navy/10 rounded-md bg-white">
+                <h3 className="text-pharmacy-navy font-medium mb-3 text-center">
+                  No PDF uploaded yet
+                </h3>
+                <p className="text-center text-pharmacy-darkGray/70 mb-4">
+                  Upload a PDF or view a sample receipt
+                </p>
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => setReceiptData(sampleData)}
+                    className="inline-flex items-center px-4 py-2 border border-pharmacy-navy text-sm font-medium rounded-md text-pharmacy-navy hover:bg-pharmacy-navy/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pharmacy-navy/50 transition-colors"
+                  >
+                    View Sample Receipt
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="animate-scale-in">
+              <Receipt data={receiptData} />
+              
+              <div className="mt-6 text-center no-print">
+                <button
+                  onClick={handleReset}
+                  className="inline-flex items-center px-4 py-2 border border-pharmacy-navy/20 text-sm font-medium rounded-md text-pharmacy-navy hover:bg-pharmacy-navy/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pharmacy-navy/50 transition-colors"
+                >
+                  Upload Another PDF
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

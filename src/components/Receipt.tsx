@@ -1,135 +1,84 @@
 
 import React from 'react';
-import { ReceiptData } from '@/types';
+import { ReceiptData, Customer } from '@/types';
 import PharmacyHeader from './PharmacyHeader';
 import MedicationTable from './MedicationTable';
 import SummaryBox from './SummaryBox';
-import { Printer } from 'lucide-react';
-import { Button } from "@/components/ui/button";
 
-interface ReceiptComponentProps {
+interface ReceiptProps {
   data: ReceiptData;
 }
 
-const formatDate = (date: string) => {
-  try {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  } catch (e) {
-    return date;
-  }
-};
-
-const Receipt: React.FC<ReceiptComponentProps> = ({ data }) => {
-  const { customer, summary, medications, pharmacy, sequenceNumber } = data;
-
-  const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      alert('Please allow pop-ups to print receipt');
-      return;
-    }
-
-    // Get the content to print
-    const content = document.querySelector('.receipt-paper');
-    
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Pharmacy Receipt</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; margin: 0; }
-            .header { text-align: center; margin-bottom: 20px; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-            table, th, td { border: 1px solid #ddd; }
-            th { background-color: #f2f2f2; font-weight: bold; padding: 8px; text-align: left; }
-            td { padding: 8px; text-align: left; }
-            .footer { text-align: center; margin-top: 30px; font-size: 14px; color: #777; }
-            .summary { border: 1px solid #ddd; padding: 15px; margin-top: 20px; }
-            .customer-info { margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 5px; }
-            .customer-info h3 { margin-top: 0; text-align: center; }
-            .customer-info .row { display: flex; flex-wrap: wrap; margin-bottom: 5px; }
-            .customer-info .row > div { flex: 1; min-width: 50%; }
-            .logo-image { max-width: 100px; height: auto; }
-            @media print {
-              body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-            }
-          </style>
-        </head>
-        <body>
-          ${content?.innerHTML || ''}
-        </body>
-      </html>
-    `);
-    
-    printWindow.document.close();
-    
-    // Wait for images and resources to load
-    setTimeout(() => {
-      printWindow.print();
-      // Don't close the window to allow manual printing
-    }, 1000);
-  };
-
+const Receipt: React.FC<ReceiptProps> = ({ data }) => {
   return (
-    <div className="w-full max-w-3xl mx-auto receipt-paper p-6 rounded-lg animate-fade-in mb-8 print:mb-0">
+    <div className="w-full max-w-3xl mx-auto receipt-paper p-6 rounded-lg animate-fade-in">
       {/* Pharmacy Header */}
-      <PharmacyHeader pharmacyInfo={pharmacy} />
+      <PharmacyHeader pharmacyInfo={data.pharmacy} />
       
-      {/* Invoice ID and Date */}
-      <div className="mb-2 text-xs text-pharmacy-darkGray/70 flex justify-between">
-        <span>Invoice Number: {sequenceNumber || 'N/A'}</span>
-        <span>Print Date: {new Date().toLocaleDateString()}</span>
-      </div>
-      
-      {/* Company Information */}
+      {/* Customer Information */}
       <div className="mb-6 p-4 bg-pharmacy-lightBlue/30 rounded-md animate-scale-in">
-        <h2 className="text-pharmacy-navy font-medium mb-2 text-center">تعـاقدات</h2>
+        <h2 className="text-pharmacy-navy font-medium mb-3 text-center">تعـاقدات</h2>
         <h3 className="text-pharmacy-navy/80 font-medium mb-3 text-center text-sm">شركة الأهلي للخدمات الطبية</h3>
         
-        {/* Additional information from the PDF (highlighted in the image) */}
-        <div className="flex flex-wrap justify-between text-sm mt-3 border-t pt-3 border-pharmacy-navy/10">
-          <div className="w-full md:w-1/2 mb-2 md:mb-0">
-            <p><span className="font-medium">Beneficiary Name:</span> {customer.name || 'N/A'}</p>
-            <p><span className="font-medium">Member ID:</span> {customer.id || 'N/A'}</p>
-            <p><span className="font-medium">Member Of:</span> {customer.memberOf || 'N/A'}</p>
-            <p><span className="font-medium">Mobile No:</span> {customer.mobileNo || 'N/A'}</p>
+        <div className="grid grid-cols-1 gap-4">
+          <div className="text-right">
+            <p className="text-sm text-pharmacy-darkGray/70">الاسم:</p>
+            <p className="font-medium rtl">{data.customer.name}</p>
           </div>
-          <div className="w-full md:w-1/2">
-            <p><span className="font-medium">Dispensed Date:</span> {customer.date ? formatDate(customer.date) : 'N/A'}</p>
-            <p><span className="font-medium">Co-payment:</span> {summary.coveragePercentage}%</p>
-            <p><span className="font-medium">Claim Code:</span> {customer.claimCode || 'N/A'}</p>
-            <p><span className="font-medium">Provider:</span> {pharmacy.name}</p>
-          </div>
+          
+          {data.summary.coveragePercentage > 0 && (
+            <div className="text-right">
+              <p className="text-sm text-pharmacy-darkGray/70">نسبة التغطية:</p>
+              <p className="font-medium">{data.summary.coveragePercentage}%</p>
+            </div>
+          )}
+          
+          {data.customer.date && (
+            <div className="text-right">
+              <p className="text-sm text-pharmacy-darkGray/70">التاريخ:</p>
+              <p className="font-medium">{data.customer.date}</p>
+            </div>
+          )}
         </div>
       </div>
       
       {/* Medications */}
       <div className="mb-6">
-        <h2 className="text-pharmacy-navy font-medium mb-3 text-center">Medications</h2>
-        <MedicationTable medications={medications} coveragePercentage={summary.coveragePercentage} />
+        <h2 className="text-pharmacy-navy font-medium mb-3 text-center">الأدوية</h2>
+        <MedicationTable medications={data.medications} />
       </div>
       
       {/* Summary */}
-      <SummaryBox summary={summary} />
+      <SummaryBox summary={data.summary} />
       
       {/* Receipt Footer */}
       <div className="mt-8 text-center text-xs text-pharmacy-darkGray/50 animate-fade-in">
         <p>شكراً لزيارتكم صيدلية الزهور</p>
+        <p className="mt-1">تاريخ الطباعة: {new Date().toLocaleDateString()}</p>
       </div>
       
       {/* Print Button - Visible only on screen, not in print */}
       <div className="mt-6 text-center no-print animate-fade-in">
-        <Button
-          onClick={handlePrint}
-          className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-white bg-pharmacy-coral hover:bg-pharmacy-coral/90"
+        <button
+          onClick={() => window.print()}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pharmacy-coral hover:bg-pharmacy-coral/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pharmacy-coral/50 transition-colors"
         >
-          <Printer className="h-4 w-4 mr-2" />
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            className="h-4 w-4 mr-2" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" 
+            />
+          </svg>
           Print Receipt
-        </Button>
+        </button>
       </div>
     </div>
   );
